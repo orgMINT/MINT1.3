@@ -1,0 +1,33 @@
+; .engine mycomputer
+
+.include "constants.asm"
+.include "IOSerial.asm"
+
+.macro testInput,s1
+    ld HL,buf1%%M
+    ld (tbPtr),HL
+    jr buf2%%M
+buf1%%M:
+    DB s1,$0D
+buf2%%M:
+.endm
+
+LD SP,DSTACK
+CALL init
+ld HL,testGetCharImpl                       ; change getchar implmentation to use tbuf
+LD (GETCVEC),HL
+
+testInput "3."
+JP interpret
+
+testGetCharImpl:
+        PUSH HL
+        LD HL,(tbPtr)
+        LD A,(HL)
+        INC HL
+        LD (tbPtr),HL
+        POP HL
+        RET                 ;NZ flagged if character input
+
+.include "MAIN.asm"
+.include "ram.asm"
